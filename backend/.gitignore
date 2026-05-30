@@ -23,7 +23,7 @@ wheels/
 # Virtual Environments
 venv/
 .venv/
-.env/
+.env
 ENV/
 
 # Secrets and environment variables
