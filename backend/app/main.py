@@ -1,0 +1,19 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.core.config import settings
+from app.core.database import engine,Base
+from app.api import task
+
+Base.metadata.create_all(bind = engine)
+
+app = FastAPI(
+    title="taskboard API",
+    description="api for CRUD ops in tasks DB",
+    version="1.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[settings.FRONTEND_URL]
+)
+
