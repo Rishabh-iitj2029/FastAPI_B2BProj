@@ -6,7 +6,7 @@ from app.core.auth import AuthUser,get_current_user, require_view, require_edit,
 from app.models.task import Task,TaskStatus
 from app.schemas.task import TaskCreate,TaskUpdate,TaskResponse,TaskStatusUpdate
 
-router = APIRouter(prefix='/api/tasks',tags="tasks")
+router = APIRouter(prefix='/api/tasks',tags=["tasks"])
 
 
 @router.get(path="",response_model=List[TaskResponse])
