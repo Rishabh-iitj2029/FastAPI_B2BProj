@@ -1,17 +1,19 @@
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import { useOrganization } from '@clerk/clerk-react'
 import TaskColumn from './TaskColumn'
+import TaskForm from './TaskForm'
 import { createTasks, updateTasks, deleteTasks } from '../services/api'
 
-const STATUS = ["pending", "starting", "completed"]
+const STATUS = ["pending", "started", "completed"]
 
-const KanbanBoard = () => {
-  const { memebership } = useOrganization();
-  const {showForm, setShowForm} = useState(false)
+const KanbanBoard = ({ tasks, setTasks, getToken }) => {
+  const { membership } = useOrganization()
+  const [showForm, setShowForm] = useState(false)
   const [editingtask, seteditingtask] = useState(null)
 
-  const role = memebership?.role
+  const role = membership?.role
   const canManage = role === "org:admin" || role === "org:editor"
+  
   function getTaskStatus(status){
     return tasks.filter(task => task.status === status)
   }
@@ -24,7 +26,7 @@ const KanbanBoard = () => {
   async function handleDelete(taskId){
     if(!confirm("Are you sure you want to delete the task")) return
 
-    const taskToDelete = task.find(t => t.id === taskId)
+    const taskToDelete = tasks.find(t => t.id === taskId)
     setTasks(prev => prev.filter(t => t.id !== taskId))
 
     try{
@@ -35,7 +37,7 @@ const KanbanBoard = () => {
     }
   }
 
-  async function hnadleSubmit(taskData){
+  async function handleSubmit(taskData){
     if(editingtask){
       const updatedTask = {...editingtask,...taskData}
       setTasks(prev => prev.map(t => t.id === editingtask.id ? updatedTask :t))
@@ -99,7 +101,7 @@ const KanbanBoard = () => {
 
         {showForm && <TaskForm
             task={editingtask}
-            onSubmit={hnadleSubmit}
+            onSubmit={handleSubmit}
             onCancel={handleCancel}
         />}
     </div>

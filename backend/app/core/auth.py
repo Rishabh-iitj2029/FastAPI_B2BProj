@@ -14,27 +14,27 @@ class AuthUser:
     def __init__(self, user_id:str, org_id:str,org_permissions:list):
         self.user_id = user_id
         self.org_id = org_id
-        self.org_permisions = org_permissions
+        self.org_permissions = org_permissions
         
 
-    def has_permission(self,permissions:str) -> bool:
-        return permissions in self.org_permisions
+    def has_permission(self, permission:str) -> bool:
+        return permission in self.org_permissions
 
     @property
     def can_view(self) -> bool:
-        return self.has_permission("org:tasks:view")
+        return self.has_permission("org:task:view") or self.has_permission("org:tasks:view")
     
     @property
     def can_edit(self) -> bool:
-        return self.has_permission("org:tasks:edit")
+        return self.has_permission("org:task:edit") or self.has_permission("org:tasks:edit")
     
     @property
     def can_create(self) -> bool:
-        return self.has_permission("org:tasks:create")
+        return self.has_permission("org:task:create") or self.has_permission("org:tasks:create")
     
     @property
     def can_delete(self) -> bool:
-        return self.has_permission("org:tasks:delete")
+        return self.has_permission("org:task:delete") or self.has_permission("org:tasks:delete")
     
 
 def convert_to_httpx_request(fastapi_request:Request) -> httpx.Request:
@@ -48,33 +48,40 @@ def convert_to_httpx_request(fastapi_request:Request) -> httpx.Request:
 async def get_current_user(request:Request) -> AuthUser:
     httpx_request = convert_to_httpx_request(request)
 
+    # In local development, if frontend runs on 5174 or 5173, let's allow both
+    authorized_parties = [settings.FRONTEND_URL]
+    if "localhost:5173" in settings.FRONTEND_URL:
+        authorized_parties.append("http://localhost:5174")
+    elif "localhost:5174" in settings.FRONTEND_URL:
+        authorized_parties.append("http://localhost:5173")
+
     request_state = clerk.authenticate_request(
         httpx_request,
-        AuthenticateRequestOptions(authorized_parties=[settings.FRONTEND_URL])
+        AuthenticateRequestOptions(authorized_parties=authorized_parties)
     )
 
 
     if not request_state.is_signed_in:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenciated"
+            detail="Not authenticated"
         )
     
     claims = request_state.payload
-    user_id = claims.get("key")
+    user_id = claims.get("sub")
     org_id = claims.get("org_id")
-    org_permission =claims.get("permissions") or claims.get("org_permissions") or []
+    org_permission = claims.get("permissions") or claims.get("org_permissions") or []
 
     if not user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenciated"
+            detail="Not authenticated"
         )
     
     if not org_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No organizated selected"
+            detail="No organization selected"
         )
 
 
@@ -92,12 +99,12 @@ def require_create(user: AuthUser = Depends(get_current_user)) -> AuthUser:
     if not user.can_create:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="create permission required"
+            detail="Create permission required"
         )
     return user
 
 def require_edit(user: AuthUser = Depends(get_current_user)) -> AuthUser:
-    if not user.can_view:
+    if not user.can_edit:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Edit permission required"
@@ -105,10 +112,10 @@ def require_edit(user: AuthUser = Depends(get_current_user)) -> AuthUser:
     return user
 
 def require_delete(user: AuthUser = Depends(get_current_user)) -> AuthUser:
-    if not user.can_view:
+    if not user.can_delete:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="delete permission required"
+            detail="Delete permission required"
         )
     return user
 

@@ -7,7 +7,7 @@ const STATUS_LABELS = {
     completed: "Done"
 }
 
-const TaskColumn = (status,tasks, onEdit, onDelete) => {
+const TaskColumn = ({ status, tasks = [], onEdit, onDelete }) => {
   return (
     <div className={"kanban-column"}>
         <div className={`kanban-column-header kanban-column-header-${status}`}>

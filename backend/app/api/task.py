@@ -11,7 +11,7 @@ router = APIRouter(prefix='/api/tasks',tags=["tasks"])
 
 @router.get(path="",response_model=List[TaskResponse])
 def list_tasks(user:AuthUser = Depends(require_view), db:Session = Depends(get_db)):
-    tasks = db.query(Task).filter(Task.org_id == user.org.id).all()
+    tasks = db.query(Task).filter(Task.org_id == user.org_id).all()
     return tasks
        
 @router.post(path="",response_model=TaskResponse)
@@ -73,10 +73,10 @@ def update_task(
     if task_data.title is not None:
         task.title = task_data.title
 
-    if task_data.title is not None:
+    if task_data.description is not None:
         task.description = task_data.description
 
-    if task_data.title is not None:
+    if task_data.status is not None:
         task.status = task_data.status
 
     db.commit()
