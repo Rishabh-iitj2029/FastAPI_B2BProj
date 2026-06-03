@@ -31,21 +31,21 @@ export async function getTasks(getToken) {
 }
 
 export async function createTasks(getToken,task) {
-    return fetchWithAuth("/api/tasks",getToken, options={
+    return fetchWithAuth("/api/tasks",getToken, {
         method:"POST",
         body:JSON.stringify(task)
     })
 }
 
 export async function updateTasks(getToken, task_id,task) {
-    return fetchWithAuth(`/api/tasks/${task_id}`,getToken,options={
+    return fetchWithAuth(`/api/tasks/${task_id}`,getToken,{
         method:"PUT",
         body:JSON.stringify(task)
     })
 }
 
 export async function deleteTasks(getToken, task_id) {
-    return fetchWithAuth(`/api/tasks/${task_id}`,getToken,options={
+    return fetchWithAuth(`/api/tasks/${task_id}`,getToken,{
         method:"DELETE",
     })
 }

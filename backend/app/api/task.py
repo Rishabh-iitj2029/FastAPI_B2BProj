@@ -84,7 +84,7 @@ def update_task(
     return task
     
 
-@router.delete("/{task_id}", response_model=TaskResponse)
+@router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_task(
     task_id:str,
     user:AuthUser=Depends(require_delete),
