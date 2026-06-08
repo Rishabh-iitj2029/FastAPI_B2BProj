@@ -5,7 +5,7 @@ import { getTasks } from '../services/api'
 
 const Dashboard = () => {
   const {getToken} = useAuth()
-  const {organization, membership} = useOrganization(
+  const {organization, memberships} = useOrganization(
     {memberships : {infinite:true}}
   )
 
@@ -13,7 +13,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  const membershipCount = membership?.count ?? 0;
+  const membershipCount = memberships?.count ?? 0;
   const orgId = organization?.id
   const loadTasks = useCallback(async() => {
     try {
