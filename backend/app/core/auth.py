@@ -47,14 +47,7 @@ def convert_to_httpx_request(fastapi_request:Request) -> httpx.Request:
 
 async def get_current_user(request:Request) -> AuthUser:
     httpx_request = convert_to_httpx_request(request)
-
-    # In local development, if frontend runs on 5174 or 5173, let's allow both
     authorized_parties = [settings.FRONTEND_URL]
-    if "localhost:5173" in settings.FRONTEND_URL:
-        authorized_parties.append("http://localhost:5174")
-    elif "localhost:5174" in settings.FRONTEND_URL:
-        authorized_parties.append("http://localhost:5173")
-
     request_state = clerk.authenticate_request(
         httpx_request,
         AuthenticateRequestOptions(authorized_parties=authorized_parties)
